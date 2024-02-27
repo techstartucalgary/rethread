@@ -1,7 +1,7 @@
 import ScannerProvider from "../src/abstract/scanner.abstract.js";
 import { TesseractServiceError } from "../src/error/tesseract.error.js";
 import ScannerService from "../src/service/scanner.service.js";
-import { ScannerRequest, Tag } from "../src/types.js";
+import { ScannerRequest, Tag, Info, Flags } from "../src/types.js";
 
 describe("ScannerService Unit Tests", () => {
   let scannerService: ScannerService;
@@ -12,16 +12,17 @@ describe("ScannerService Unit Tests", () => {
     scannerService = new ScannerService(mockScannerProvider);
   });
 
-  test("Get materials from text", () => {
-    const materials: Tag[] = scannerService.getMaterials(
-      "90% Cotton 10% Nylon",
+  test("Get info from text", () => {
+    const info: Flags = scannerService.getMaterials(
+      "90% Cotton 10% Nylon Made    in Canada Dry clean only",
     );
-    expect(materials).toBeInstanceOf(Array);
-    expect(materials).toHaveLength(2);
-    expect(materials[0].material).toBe("Cotton");
-    expect(materials[0].percentage).toBe("90");
-    expect(materials[1].material).toBe("Nylon");
-    expect(materials[1].percentage).toBe("10");
+    expect(info).toBeInstanceOf(Object);
+    expect(info.country).toBe("Canada");
+    expect(info.tags).toHaveLength(2);
+    expect(info.tags[0].material).toBe("Cotton");
+    expect(info.tags[0].percentage).toBe("90");
+    expect(info.tags[1].material).toBe("Nylon");
+    expect(info.tags[1].percentage).toBe("10");
   });
 
   test("Get text from image", async () => {
@@ -44,10 +45,15 @@ describe("ScannerService Unit Tests", () => {
 });
 
 class MockScannerProvider implements ScannerProvider {
-  getMaterials(text: string): Tag[] {
+  getMaterials(text: string): Flags {
     throw new Error("Method not implemented.");
   }
-
+  checkPercent = (arr: Tag[]): Tag[] => {
+    throw new Error("Method not implemented.");
+  }
+  getSustainability = (arr: Flags): Info => {
+    throw new Error("Method not implemented.");
+  }
   getTextFromImage(scannerRequest: ScannerRequest): Promise<string> {
     const { imageUrl } = scannerRequest;
     if (!imageUrl) {
